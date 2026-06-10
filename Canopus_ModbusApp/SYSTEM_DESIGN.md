@@ -1,6 +1,6 @@
-# System Design Document (SDD) - ESP32 Canopus Modbus Gateway
+# System Design Document (SDD) - ESP32 ModQ Modbus Gateway
 
-This document provides a detailed specification of the hardware interfaces, software architecture, data flows, and state machines for the **ESP32 Canopus Modbus Gateway**.
+This document provides a detailed specification of the hardware interfaces, software architecture, data flows, and state machines for the **ESP32 ModQ Modbus Gateway**.
 
 ---
 
@@ -15,7 +15,7 @@ graph TD
         Broker[MQTT Broker]
     end
 
-    subgraph ESP32 Canopus Gateway (Lớp Cổng Điều Khiển)
+    subgraph ESP32 ModQ Gateway (Lớp Cổng Điều Khiển)
         WebUI[Web Server - Port 80]
         MQTT[MQTT Client]
         CLI[Serial CLI Parser]
@@ -44,7 +44,7 @@ graph TD
 
 ### Core Components:
 1.  **WiFi Manager (AP + STA Mode)**: Runs concurrently in dual modes:
-    *   **Access Point (AP)**: Hosts a local open network named `Canopus_AP` at IP `192.168.4.1` for local setup.
+    *   **Access Point (AP)**: Hosts a local open network named `ModQ_AP` at IP `192.168.4.1` for local setup.
     *   **Station (STA)**: Connects to the local router/enterprise WiFi networks (supporting up to 3 configurations with auto-switching).
 2.  **Web Server (Port 80)**: Serves the responsive multilingual WebUI Single-Page App (English, Vietnamese, Spanish, Portuguese) stored in flash memory (`PROGMEM`) and exposes REST endpoints for data telemetry and settings.
 3.  **MQTT Client (PubSubClient)**: Maintains connection to the designated broker, publishes polled register datasets in JSON, and subscribes to command topics to receive and execute remote Modbus write operations.
@@ -69,7 +69,7 @@ sequenceDiagram
     
     ESP->>NVS: Settings::init() & Settings::load()
     NVS-->>ESP: Return configuration data (SSIDs, devices, MQTT)
-    ESP->>Net: setupWiFi() - Start Canopus_AP & load WiFiMulti
+    ESP->>Net: setupWiFi() - Start ModQ_AP & load WiFiMulti
     ESP->>MQ: setupMqtt() - Configure broker address and callback
     ESP->>MB: Serial2.begin() - Start UART2 serial (9600 bps default)
     ESP->>ESP: Blink LED_SYS and LED_MB 3 times (Boot success)
@@ -126,7 +126,7 @@ The connection manager monitors both WiFi and MQTT states to execute auto-recove
 ```mermaid
 stateDiagram-v2
     [*] --> Init
-    Init --> AP_Active : local AP 'Canopus_AP' started
+    Init --> AP_Active : local AP 'ModQ_AP' started
     
     state AP_Active {
         [*] --> AP_Ready : No WiFi networks stored

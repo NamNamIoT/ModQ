@@ -1,13 +1,13 @@
-# ESP32 Canopus Modbus Gateway Application
+# ModQ: ESP32 Modbus Gateway Application
 
-The **Canopus_ModbusApp** is a comprehensive IoT gateway solution built for the ESP32 Canopus development board. It enables data collection from multiple Modbus RTU devices (via RS485), visualizes it through a responsive local Web UI (with multilingual support), and publishes telemetry data to an MQTT Broker.
+The **Canopus_ModbusApp** is a comprehensive IoT gateway solution built for the ESP32 ModQ development board. It enables data collection from multiple Modbus RTU devices (via RS485), visualizes it through a responsive local Web UI (with multilingual support), and publishes telemetry data to an MQTT Broker.
 
 ---
 
 ## 🛠️ Key Features
 
 - **Multi-WiFi Connection Manager**: Save up to 3 WiFi network configurations. The gateway automatically reconnects and switches to another available network if the current one drops.
-- **Fallback Access Point**: Simultaneously hosts an open WiFi Access Point named `Canopus_AP` (default IP `192.168.4.1`) to ensure you never get locked out and can always configure settings locally.
+- **Fallback Access Point**: Simultaneously hosts an open WiFi Access Point named `ModQ_AP` (default IP `192.168.4.1`) to ensure you never get locked out and can always configure settings locally.
 - **Multilingual Web UI**: Supports 4 languages: **English (Default)**, **Vietnamese**, **Spanish**, and **Portuguese**.
 - **Live Visual Dashboard**: Modbus values are refreshed every 1.5s with smooth flash animations on value changes. The UI displays descriptive Modbus RTU error alerts if queries fail.
 - **Bi-directional MQTT**:
@@ -21,7 +21,7 @@ The **Canopus_ModbusApp** is a comprehensive IoT gateway solution built for the 
 
 ## ⚙️ Hardware Pinout Configuration
 
-The gateway application is optimized for the **ESP32 Canopus** board using the following pin mapping:
+The gateway application is optimized for the **ESP32 ModQ** board using the following pin mapping:
 
 | Interface | ESP32 GPIO | Description |
 | :--- | :--- | :--- |
@@ -46,7 +46,7 @@ Before compiling in the Arduino IDE, make sure to install the following librarie
 
 1. Download or clone the `Canopus_ModbusApp` directory.
 2. Open the main sketch `Canopus_ModbusApp.ino` in **Arduino IDE**.
-3. Connect the **ESP32 Canopus** board to your PC via a USB Type-C cable.
+3. Connect the **ESP32 ModQ** board to your PC via a USB Type-C cable.
 4. Select the correct COM Port and select **ESP32 Dev Module** (or your specific ESP32 board) under Tools.
 5. Click **Upload** to compile and flash the firmware onto the board.
 
@@ -74,7 +74,7 @@ Available Serial CLI commands:
 
 Once the device is powered and running:
 
-1. Connect your PC or mobile device to the open WiFi network named **`Canopus_AP`** hosted by the gateway.
+1. Connect your PC or mobile device to the open WiFi network named **`ModQ_AP`** hosted by the gateway.
 2. Open your browser and navigate to: **`http://192.168.4.1`**.
 3. Select your preferred language (English, Vietnamese, Spanish, or Portuguese) from the sidebar.
 4. **WiFi Setup**: Go to the **WiFi Networks** tab, scan for surrounding networks, select your office/home network, and enter the password. The gateway will connect and receive an IP address from your router.
@@ -90,7 +90,7 @@ Once the device is powered and running:
 
 ### 1. Telemetry Publish (Data)
 Whenever a Modbus device is successfully polled, the gateway publishes the data as a JSON payload to the topic:
-`canopus/device/data/<slave_id>` (or your custom data topic).
+`modq/device/data/<slave_id>` (or your custom data topic).
 
 **JSON Payload Format:**
 ```json
@@ -107,7 +107,7 @@ Whenever a Modbus device is successfully polled, the gateway publishes the data 
 ```
 
 ### 2. Control Subscribe (Commands)
-The gateway subscribes to the topic `canopus/device/cmd` (or your custom command topic) to receive write commands.
+The gateway subscribes to the topic `modq/device/cmd` (or your custom command topic) to receive write commands.
 
 To write a value to a Modbus slave register, publish a JSON payload to that topic:
 ```json
@@ -119,7 +119,7 @@ To write a value to a Modbus slave register, publish a JSON payload to that topi
 ```
 *Note:* This command will write the value `450` to register address `102` (using Function Code 06 - Write Single Register) on Slave ID `1`.
 
-The gateway will execute the write command and publish the result to `canopus/device/data/response`:
+The gateway will execute the write command and publish the result to `modq/device/data/response`:
 ```json
 {
   "sid": 1,

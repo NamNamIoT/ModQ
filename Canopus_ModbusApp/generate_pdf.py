@@ -6,7 +6,7 @@ class PDFManual(FPDF):
         # Upper header
         self.set_font('Arial', 'I', 8)
         self.set_text_color(100, 100, 100)
-        self.cell(0, 10, 'ESP32 Canopus Modbus Gateway - User Manual', 0, 0, 'R')
+        self.cell(0, 10, 'ESP32 ModQ Modbus Gateway - User Manual', 0, 0, 'R')
         self.ln(10)
         # Accent line
         self.set_draw_color(14, 165, 233) # Sky-500 (#0ea5e9)
@@ -55,7 +55,7 @@ class PDFManual(FPDF):
         self.set_x(25)
         self.set_font('Arial', '', 9)
         self.set_text_color(51, 65, 85) # Slate-700
-        self.cell(0, 5, 'Hardware: ESP32 Canopus Development Board', 0, 1)
+        self.cell(0, 5, 'Hardware: ESP32 ModQ Development Board', 0, 1)
         self.set_x(25)
         self.cell(0, 5, 'Firmware Version: v1.0.0 (Multilingual Edition)', 0, 1)
         self.set_x(25)
@@ -165,21 +165,21 @@ pdf.alias_nb_pages()
 
 # Cover/Title Page
 pdf.add_title(
-    'ESP32 CANOPUS MODBUS GATEWAY',
+    'ESP32 MODQ MODBUS GATEWAY',
     'Industrial RS485 Modbus RTU to Web UI and MQTT Broker Gateway\nUser & Technical Reference Manual'
 )
 
 # Section 1: Introduction
 pdf.heading1('1. Introduction & Specifications')
 pdf.body_text(
-    'The ESP32 Canopus Modbus Gateway is an industrial-grade, versatile IoT gateway designed '
+    'The ESP32 ModQ Modbus Gateway is an industrial-grade, versatile IoT gateway designed '
     'to aggregate telemetry from multiple Modbus RTU slave devices over a half-duplex RS485 bus, '
     'provide local data visualization via an offline-capable Web dashboard, and publish real-time data '
     'to MQTT brokers.'
 )
 pdf.body_text('Key system parameters and specifications:')
 pdf.bullet_point('Multi-WiFi Connection', 'Saves up to 3 WiFi network credentials and automatically transitions between them if connection is lost.')
-pdf.bullet_point('Fallback Access Point', 'Starts a local, open WiFi network "Canopus_AP" at IP 192.168.4.1 so the dashboard is always accessible.')
+pdf.bullet_point('Fallback Access Point', 'Starts a local, open WiFi network "ModQ_AP" at IP 192.168.4.1 so the dashboard is always accessible.')
 pdf.bullet_point('Multilingual Interface', 'Saves user language choice and localizes all elements into English (default), Vietnamese, Spanish, or Portuguese.')
 pdf.bullet_point('Bi-directional MQTT', 'Supports publishing JSON telemetry per device and subscribing to remote command payloads to write registers.')
 pdf.bullet_point('Visual LEDs Feedback', 'LED1 flashes on WiFi/Web activity; LED2 flashes on Modbus transactions.')
@@ -187,7 +187,7 @@ pdf.bullet_point('Visual LEDs Feedback', 'LED1 flashes on WiFi/Web activity; LED
 # Section 2: Hardware
 pdf.heading1('2. Hardware Interface & Pinout')
 pdf.body_text(
-    'The gateway utilizes the hardware peripherals on the ESP32 Canopus board. Specifically, it employs the '
+    'The gateway utilizes the hardware peripherals on the ESP32 ModQ board. Specifically, it employs the '
     'second hardware UART port (UART2) connected to an onboard SP485EE RS485 transceiver. Transmit/Receive flow '
     'direction control (DE/RE) is managed automatically by the hardware circuit.'
 )
@@ -210,7 +210,7 @@ pdf.body_text(
 )
 pdf.bullet_point('Libraries Needed', "Install \"ArduinoJson\" (v6.x or v7.x) and \"PubSubClient\" (by Nick O'Leary) via the Library Manager.")
 pdf.bullet_point('IDE Configuration', 'Open Canopus_ModbusApp.ino in Arduino IDE. Go to Tools > Board and select "ESP32 Dev Module".')
-pdf.bullet_point('Wiring Details', 'Connect the USB Type-C port of the Canopus board to your computer and select the correct COM port.')
+pdf.bullet_point('Wiring Details', 'Connect the USB Type-C port of the ModQ board to your computer and select the correct COM port.')
 pdf.bullet_point('Firmware Upload', 'Click the "Upload" button. The board LEDs will flash three times on successful boot-up.')
 
 # Section 4: Initial Configuration via COM Port
@@ -235,7 +235,7 @@ pdf.code_block([
     'Received command: wifi add MyHomeWiFi SecretPassword123',
     'SUCCESS: Added WiFi SSID: MyHomeWiFi',
     'Configuring Network Interfaces...',
-    'Access Point \'Canopus_AP\' started. IP: 192.168.4.1',
+    'Access Point \'ModQ_AP\' started. IP: 192.168.4.1',
     'Registered 1 WiFi networks.',
     ' - Added network SSID: MyHomeWiFi'
 ])
@@ -245,7 +245,7 @@ pdf.add_page()
 pdf.heading1('5. Web UI Interface (Multilingual)')
 pdf.body_text(
     'The gateway hosts an offline-capable Single-Page Web application on port 80. Connect your device to the '
-    '"Canopus_AP" WiFi network and navigate to http://192.168.4.1 on your browser.'
+    '"ModQ_AP" WiFi network and navigate to http://192.168.4.1 on your browser.'
 )
 pdf.bullet_point('Language Toggle', 'Select English, Vietnamese, Spanish, or Portuguese from the top dropdown in the sidebar to translate the dashboard dynamically.')
 pdf.bullet_point('WiFi Setup', 'Under WiFi Networks, scan nearby APs, select your network, and enter the password. Multi-WiFi operates in the background.')
@@ -261,7 +261,7 @@ pdf.body_text(
 
 pdf.heading2('6.1 Telemetry JSON Payload Format (Publish):')
 pdf.body_text(
-    'The gateway publishes Modbus values to the topic "canopus/device/data/<slave_id>" every query interval:'
+    'The gateway publishes Modbus values to the topic "modq/device/data/<slave_id>" every query interval:'
 )
 pdf.code_block([
     '{',
@@ -278,10 +278,10 @@ pdf.code_block([
 
 pdf.heading2('6.2 Control Commands (Subscribe):')
 pdf.body_text(
-    'Write values to slave registers by publishing JSON payloads to "canopus/device/cmd":'
+    'Write values to slave registers by publishing JSON payloads to "modq/device/cmd":'
 )
 pdf.code_block([
-    '# Publish to topic: canopus/device/cmd',
+    '# Publish to topic: modq/device/cmd',
     '{',
     '  "sid": 1,',
     '  "addr": 100,',
@@ -310,6 +310,6 @@ rows = [
 pdf.draw_table(headers, rows, [17, 33, 22, 98])
 
 # Output the file
-output_path = 'c:\\Users\\ADMIN\\Documents\\MEGA\\Github\\ESP32_CANOPUS\\Canopus_ModbusApp\\Canopus_ModbusApp_User_Manual.pdf'
+output_path = os.path.join(os.path.dirname(__file__), 'ModQ_ModbusApp_User_Manual.pdf')
 pdf.output(output_path)
 print(f"SUCCESS: Generated PDF manual at {output_path}")

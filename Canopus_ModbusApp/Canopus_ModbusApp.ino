@@ -168,7 +168,7 @@ void setup() {
     digitalWrite(LED_MB_PIN, LOW);
 
     Serial.begin(115200);
-    Serial.println("\n--- ESP32 Canopus Modbus Gateway starting ---");
+    Serial.println("\n--- ESP32 ModQ Modbus Gateway starting ---");
 
     // Initialize Settings (from NVS)
     Settings::init();
@@ -266,10 +266,10 @@ void setupWiFi() {
     // 1. Enable AP + STA mode so Gateway is always accessible
     WiFi.mode(WIFI_AP_STA);
     
-    // Start local Access Point (Canopus_AP, IP 192.168.4.1)
-    WiFi.softAP("Canopus_AP");
+    // Start local Access Point (ModQ_AP, IP 192.168.4.1)
+    WiFi.softAP("ModQ_AP");
     apActive = true;
-    Serial.println("Access Point 'Canopus_AP' started. IP: 192.168.4.1");
+    Serial.println("Access Point 'ModQ_AP' started. IP: 192.168.4.1");
 
     // 2. Configure WiFi Multi-AP list
     // Clear previous configurations in WiFiMulti if possible (WiFiMulti doesn't support clear, 

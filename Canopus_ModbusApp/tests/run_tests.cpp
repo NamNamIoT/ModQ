@@ -25,7 +25,7 @@ extern void test_settings_max_devices();
 
 int main() {
     std::cout << "===========================================" << std::endl;
-    std::cout << "      Canopus Modbus App Unit Tests        " << std::endl;
+    std::cout << "        ModQ Modbus App Unit Tests         " << std::endl;
     std::cout << "===========================================" << std::endl;
 
     // Run CRC Tests

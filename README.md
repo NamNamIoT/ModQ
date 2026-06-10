@@ -1,6 +1,6 @@
-# ESP32 Canopus Modbus-to-MQTT Gateway
+# ModQ: Industrial ESP32 Modbus-to-MQTT Gateway
 
-An industrial-grade, ESP32-based Modbus RTU (RS485) to MQTT & HTTP web gateway. The Canopus gateway enables polling up to 8 Modbus slave devices, mapping register data types dynamically, and publishing them to MQTT brokers or exposing them via a modern WebUI and HTTP API.
+An industrial-grade, ESP32-based Modbus RTU (RS485) to MQTT & HTTP web gateway. The ModQ gateway enables polling up to 8 Modbus slave devices, mapping register data types dynamically, and publishing them to MQTT brokers or exposing them via a modern WebUI and HTTP API.
 
 ---
 
@@ -8,10 +8,10 @@ An industrial-grade, ESP32-based Modbus RTU (RS485) to MQTT & HTTP web gateway. 
 
 - **Multi-Client Web UI**: Exposes an interactive HTML5 Web dashboard on port 80 to view live telemetry, trigger manual Modbus writes, scan WiFi networks, and upload settings.
 - **Dynamic Register Mapping**: Configure up to 8 devices and 16 registers per device, supporting diverse data types (`UINT16`, `INT16`, `UINT32`, `INT32`, `FLOAT`) and custom scaling multipliers.
-- **Failover WiFi & AP**: Configures up to 3 WiFi networks with auto-failover, while simultaneously hosting a fallback Access Point (`Canopus_AP`) for localized configuration.
+- **Failover WiFi & AP**: Configures up to 3 WiFi networks with auto-failover, while simultaneously hosting a fallback Access Point (`ModQ_AP`) for localized configuration.
 - **Bi-Directional MQTT Broker Integration**:
-  - Publishes polled data JSON packets to `canopus/device/data/<slave_id>`.
-  - Subscribes to write command packets on `canopus/device/cmd` and publishes results back to `canopus/device/data/response`.
+  - Publishes polled data JSON packets to `modq/device/data/<slave_id>`.
+  - Subscribes to write command packets on `modq/device/cmd` and publishes results back to `modq/device/data/response`.
 - **Serial CLI Commands**: A comprehensive shell interface over the USB port (115200 bps) for debugging and quick configuration.
 - **Automated Unit Testing**: Complete desktop unit testing suite (20 tests) leveraging C++ mock drivers for NVS Preferences, HardwareSerial, and Arduino base libraries.
 
@@ -51,8 +51,8 @@ Install the following libraries via the Arduino Library Manager:
 - **ArduinoJson** (v6.x or v7.x) - JSON Serialization/Deserialization
 
 ### Step 4: Flash the Firmware
-1. Open [Canopus_ModbusApp.ino](file:///c:/Users/ADMIN/Documents/MEGA\Github/ESP32_CANOPUS/Canopus_ModbusApp/Canopus_ModbusApp.ino) in the Arduino IDE.
-2. Connect the Canopus board using a USB-C cable.
+1. Open [Canopus_ModbusApp.ino](file:///d:/Github/ESP32/Canopus_ModbusApp/Canopus_ModbusApp.ino) in the Arduino IDE.
+2. Connect the ModQ board using a USB-C cable.
 3. Select the correct COM port and hit **Upload**.
 
 ---
@@ -60,8 +60,8 @@ Install the following libraries via the Arduino Library Manager:
 ## 🌐 Configuration Interfaces
 
 ### 1. Web Dashboard (HTTP)
-When the board boots up, it launches a local WiFi Access Point named `Canopus_AP` (IP: `192.168.4.1`). 
-1. Connect your PC/phone to the `Canopus_AP` network.
+When the board boots up, it launches a local WiFi Access Point named `ModQ_AP` (IP: `192.168.4.1`). 
+1. Connect your PC/phone to the `ModQ_AP` network.
 2. Open your web browser and navigate to `http://192.168.4.1`.
 3. Use the dashboard to configure WiFi networks, MQTT credentials, and Modbus register mappings.
 
@@ -83,7 +83,7 @@ Connect via serial monitor (Baud Rate: `115200`, Line Ending: `Newline`) to issu
 ## 📡 MQTT Payload Formats
 
 ### 1. Polled Modbus Data Publish
-The gateway regularly polls registers and publishes JSON data to `canopus/device/data/<slave_id>`:
+The gateway regularly polls registers and publishes JSON data to `modq/device/data/<slave_id>`:
 ```json
 {
   "name": "Demo Temp Sensor",
@@ -98,7 +98,7 @@ The gateway regularly polls registers and publishes JSON data to `canopus/device
 ```
 
 ### 2. Remote Write Commands (Subscribe)
-Publish a write command to `canopus/device/cmd`:
+Publish a write command to `modq/device/cmd`:
 ```json
 {
   "sid": 1,
@@ -106,7 +106,7 @@ Publish a write command to `canopus/device/cmd`:
   "val": 123
 }
 ```
-The gateway will write `123` to holding register `10` on Modbus slave `1`, and reply on `canopus/device/data/response`:
+The gateway will write `123` to holding register `10` on Modbus slave `1`, and reply on `modq/device/data/response`:
 ```json
 {
   "sid": 1,

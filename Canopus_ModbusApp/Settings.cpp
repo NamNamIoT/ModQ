@@ -5,7 +5,7 @@ AppConfig config;
 DeviceStatus deviceStates[MAX_DEVICES];
 
 namespace Settings {
-    const char* PREFS_NAMESPACE = "canopus";
+    const char* PREFS_NAMESPACE = "modq";
     const char* PREFS_KEY = "cfg";
 
     void reset() {
@@ -19,9 +19,9 @@ namespace Settings {
         config.mqtt.port = 1883;
         strcpy(config.mqtt.user, "");
         strcpy(config.mqtt.password, "");
-        sprintf(config.mqtt.clientId, "canopus_%06X", (uint32_t)(ESP.getEfuseMac() & 0xFFFFFF));
-        strcpy(config.mqtt.dataTopic, "canopus/device/data");
-        strcpy(config.mqtt.cmdTopic, "canopus/device/cmd");
+        sprintf(config.mqtt.clientId, "modq_%06X", (uint32_t)(ESP.getEfuseMac() & 0xFFFFFF));
+        strcpy(config.mqtt.dataTopic, "modq/device/data");
+        strcpy(config.mqtt.cmdTopic, "modq/device/cmd");
 
         // Device Defaults (1 Demo Device)
         config.devices[0].active = true;
@@ -144,11 +144,11 @@ namespace Settings {
             config.mqtt.user[32] = '\0';
             strncpy(config.mqtt.password, mqtt["pass"] | "", 64);
             config.mqtt.password[64] = '\0';
-            strncpy(config.mqtt.clientId, mqtt["cid"] | "canopus_node", 32);
+            strncpy(config.mqtt.clientId, mqtt["cid"] | "modq_node", 32);
             config.mqtt.clientId[32] = '\0';
-            strncpy(config.mqtt.dataTopic, mqtt["dtop"] | "canopus/device/data", 127);
+            strncpy(config.mqtt.dataTopic, mqtt["dtop"] | "modq/device/data", 127);
             config.mqtt.dataTopic[127] = '\0';
-            strncpy(config.mqtt.cmdTopic, mqtt["ctop"] | "canopus/device/cmd", 127);
+            strncpy(config.mqtt.cmdTopic, mqtt["ctop"] | "modq/device/cmd", 127);
             config.mqtt.cmdTopic[127] = '\0';
         }
 

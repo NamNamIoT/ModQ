@@ -9,7 +9,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Canopus - Modbus RTU IoT Gateway</title>
+    <title>ESP32 ModQ - Modbus RTU IoT Gateway</title>
     <style>
         :root {
             --primary: #0ea5e9;
@@ -605,8 +605,8 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <!-- Sidebar Menu -->
     <div class="sidebar">
         <div class="logo-container">
-            <div class="logo-icon">C</div>
-            <div class="logo-text" data-i18n="app_title">CANOPUS GATEWAY</div>
+            <div class="logo-icon">M</div>
+            <div class="logo-text" data-i18n="app_title">MODQ GATEWAY</div>
         </div>
 
         <!-- Language Selector -->
@@ -753,16 +753,16 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 </div>
                 <div class="form-group">
                     <label data-i18n="lbl_mqtt_client_id">Client ID</label>
-                    <input type="text" class="form-control" id="mqtt-client-id" placeholder="canopus_client">
+                    <input type="text" class="form-control" id="mqtt-client-id" placeholder="modq_client">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label data-i18n="lbl_mqtt_dtopic">Data Publish Topic</label>
-                        <input type="text" class="form-control" id="mqtt-dtopic" placeholder="canopus/device/data">
+                        <input type="text" class="form-control" id="mqtt-dtopic" placeholder="modq/device/data">
                     </div>
                     <div class="form-group">
                         <label data-i18n="lbl_mqtt_ctopic">Command/Write Topic</label>
-                        <input type="text" class="form-control" id="mqtt-ctopic" placeholder="canopus/device/cmd">
+                        <input type="text" class="form-control" id="mqtt-ctopic" placeholder="modq/device/cmd">
                     </div>
                 </div>
                 
@@ -883,7 +883,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
         // --- TRANSLATION DICTIONARY ---
         const translations = {
             en: {
-                app_title: "CANOPUS GATEWAY",
+                app_title: "MODQ GATEWAY",
                 nav_dashboard: "Dashboard",
                 nav_devices: "Modbus Devices",
                 nav_wifi: "WiFi Networks",
@@ -894,7 +894,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 lbl_uptime: "Uptime: ",
                 lbl_disconnected: "Disconnected",
                 lbl_connected: "Connected",
-                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_ap_mode: "WiFi AP: ModQ_AP",
                 lbl_last_update: "Last update: ",
                 lbl_no_devices: "No active Modbus devices configured or offline.",
                 btn_configure_now: "Configure Now",
@@ -963,7 +963,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_mult_invalid: "Multiplier must be a number at row ",
                 prompt_delete_dev: "Are you sure you want to delete device slot #",
                 prompt_delete_wifi: "Delete this WiFi configuration?",
-                prompt_restart: "Are you sure you want to restart ESP32 Canopus Gateway?",
+                prompt_restart: "Are you sure you want to restart ESP32 ModQ Gateway?",
                 prompt_factory_reset: "Factory reset will wipe all configurations. Are you sure?",
                 toast_restarting: "Restarting Gateway... Please reload this page in 5-10 seconds.",
                 toast_resetting: "Performing factory reset and restarting...",
@@ -975,7 +975,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_modbus_crc: "CRC validation failed (CRC Error)"
             },
             vi: {
-                app_title: "CANOPUS GATEWAY",
+                app_title: "MODQ GATEWAY",
                 nav_dashboard: "Dashboard",
                 nav_devices: "Thiết Bị Modbus",
                 nav_wifi: "Mạng WiFi",
@@ -986,7 +986,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 lbl_uptime: "Uptime: ",
                 lbl_disconnected: "Mất kết nối",
                 lbl_connected: "Đã kết nối",
-                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_ap_mode: "WiFi AP: ModQ_AP",
                 lbl_last_update: "Lần cập nhật cuối: ",
                 lbl_no_devices: "Chưa cấu hình thiết bị Modbus nào hoặc thiết bị không hoạt động.",
                 btn_configure_now: "Cấu hình ngay",
@@ -1055,7 +1055,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_mult_invalid: "Hệ số phải là số tại dòng ",
                 prompt_delete_dev: "Bạn có chắc chắn muốn xóa thiết bị khe #",
                 prompt_delete_wifi: "Xóa cấu hình WiFi này?",
-                prompt_restart: "Bạn có chắc chắn muốn khởi động lại ESP32 Canopus Gateway?",
+                prompt_restart: "Bạn có chắc chắn muốn khởi động lại ESP32 ModQ Gateway?",
                 prompt_factory_reset: "Khôi phục cài đặt gốc sẽ xóa sạch toàn bộ cấu hình. Bạn có chắc chắn?",
                 toast_restarting: "Đang khởi động lại Gateway... Hãy tải lại trang sau 5-10 giây.",
                 toast_resetting: "Đang khôi phục cài đặt gốc và khởi động lại...",
@@ -1067,7 +1067,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_modbus_crc: "Lỗi CRC (Sai kiểm tra tổng)"
             },
             es: {
-                app_title: "PASARELA CANOPUS",
+                app_title: "PASARELA MODQ",
                 nav_dashboard: "Dashboard",
                 nav_devices: "Dispositivos Modbus",
                 nav_wifi: "Redes WiFi",
@@ -1078,7 +1078,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 lbl_uptime: "Uptime: ",
                 lbl_disconnected: "Desconectado",
                 lbl_connected: "Conectado",
-                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_ap_mode: "WiFi AP: ModQ_AP",
                 lbl_last_update: "Última actualización: ",
                 lbl_no_devices: "No hay dispositivos Modbus configurados o fuera de línea.",
                 btn_configure_now: "Configurar ahora",
@@ -1147,7 +1147,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_mult_invalid: "¡El multiplicador debe ser un número en la fila ",
                 prompt_delete_dev: "¿Está seguro de que desea eliminar la ranura de dispositivo #",
                 prompt_delete_wifi: "¿Eliminar esta configuración de WiFi?",
-                prompt_restart: "¿Está seguro de que desea reiniciar la Pasarela ESP32 Canopus?",
+                prompt_restart: "¿Está seguro de que desea reiniciar la Pasarela ESP32 ModQ?",
                 prompt_factory_reset: "El restablecimiento de fábrica borrará toda la configuración. ¿Está seguro?",
                 toast_restarting: "Reiniciando Pasarela... Recargue esta página en 5-10 segundos.",
                 toast_resetting: "Realizando restablecimiento de fábrica y reiniciando...",
@@ -1159,7 +1159,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_modbus_crc: "Error de validación CRC (Error de CRC)"
             },
             pt: {
-                app_title: "GATEWAY CANOPUS",
+                app_title: "GATEWAY MODQ",
                 nav_dashboard: "Painel",
                 nav_devices: "Dispositivos Modbus",
                 nav_wifi: "Redes WiFi",
@@ -1170,7 +1170,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 lbl_uptime: "Uptime: ",
                 lbl_disconnected: "Desconectado",
                 lbl_connected: "Conectado",
-                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_ap_mode: "WiFi AP: ModQ_AP",
                 lbl_last_update: "Última atualização: ",
                 lbl_no_devices: "Nenhum dispositivo Modbus configurado ou offline.",
                 btn_configure_now: "Configurar Agora",
@@ -1239,7 +1239,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
                 err_mult_invalid: "O multiplicador deve ser um número na linha ",
                 prompt_delete_dev: "Tem certeza que deseja excluir o slot do dispositivo #",
                 prompt_delete_wifi: "Excluir esta configuração de WiFi?",
-                prompt_restart: "Tem certeza que deseja reiniciar o Gateway ESP32 Canopus?",
+                prompt_restart: "Tem certeza que deseja reiniciar o Gateway ESP32 ModQ?",
                 prompt_factory_reset: "A restauração de fábrica apagará todas as configurações. Tem certeza?",
                 toast_restarting: "Reiniciando Gateway... Recarregue esta página em 5-10 segundos.",
                 toast_resetting: "Realizando restauração de fábrica e reiniciando...",
@@ -1252,7 +1252,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
             }
         };
 
-        let currentLang = localStorage.getItem('canopus_lang') || 'en';
+        let currentLang = localStorage.getItem('modq_lang') || 'en';
         let currentTab = 'dashboard';
         let configData = { wifis: [], mqtt: {}, devices: [] };
         let liveData = {};
@@ -1260,7 +1260,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 
         function changeLanguage(lang) {
             currentLang = lang;
-            localStorage.setItem('canopus_lang', lang);
+            localStorage.setItem('modq_lang', lang);
             document.getElementById('lang-select').value = lang;
             updateLanguage();
             
@@ -1806,9 +1806,9 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
             document.getElementById('mqtt-port').value = mq.port || 1883;
             document.getElementById('mqtt-user').value = mq.user || '';
             document.getElementById('mqtt-pass').value = mq.pass || '';
-            document.getElementById('mqtt-client-id').value = mq.cid || 'canopus_client';
-            document.getElementById('mqtt-dtopic').value = mq.dtop || 'canopus/device/data';
-            document.getElementById('mqtt-ctopic').value = mq.ctop || 'canopus/device/cmd';
+            document.getElementById('mqtt-client-id').value = mq.cid || 'modq_client';
+            document.getElementById('mqtt-dtopic').value = mq.dtop || 'modq/device/data';
+            document.getElementById('mqtt-ctopic').value = mq.ctop || 'modq/device/cmd';
         }
 
         function saveMqtt() {
