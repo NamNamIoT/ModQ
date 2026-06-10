@@ -2,7 +2,7 @@
 
 #ifdef Canopus_ESP32
 #define Serial_Canopus Serial2
-#endif Canopus_ESP32
+#endif // Canopus_ESP32
 
 #define __MODBUSMASTER_DEBUG__ (0)
 
@@ -29,8 +29,8 @@ RS232/485 (via RTU protocol).
 
 #define REGISTER 0
 #define REDE_RS485 -1
-#define  RS485_Tranmit digitalWrite(REDE_RS485, HIGH) // cho phep truyen
-#define  RS485_Receive digitalWrite(REDE_RS485, LOW) // cho phep truyen
+#define  RS485_Transmit digitalWrite(REDE_RS485, HIGH) // cho phep truyen
+#define  RS485_Receive digitalWrite(REDE_RS485, LOW)  // cho phep nhan
 #define waittread 10
 
 class ModbusMaster

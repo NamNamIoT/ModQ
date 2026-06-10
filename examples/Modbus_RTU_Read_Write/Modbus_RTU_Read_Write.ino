@@ -24,9 +24,9 @@ void loop()
     data[0]=node.getResponseBuffer(0);
     data[1]=node.getResponseBuffer(1);
     data[2]=node.getResponseBuffer(2);
-    Serial.printf("\r\nValue 30001: %d",data[0]);
-    Serial.printf("\r\nValue 30002: %d",data[1]);
-    Serial.printf("\r\nValue 30003: %d",data[2]);
+    Serial.printf("\r\nValue 30002: %d",data[0]);  // readInputRegisters(2, ...) bat dau tu 30002
+    Serial.printf("\r\nValue 30003: %d",data[1]);
+    Serial.printf("\r\nValue 30004: %d",data[2]);
   }
   else Serial.print("Read input fail");
   

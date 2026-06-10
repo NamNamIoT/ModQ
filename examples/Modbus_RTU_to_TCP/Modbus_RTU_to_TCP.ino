@@ -78,11 +78,11 @@ int id_from_mbtcp=0, id1=0, id2=0, id3=0, id4=0;
 void add_resgister();
 void setup() 
 {
-  wifiMulti.addAP("EURO ELECTRIC", "veec0812");
+  wifiMulti.addAP("YOUR_WIFI_SSID", "YOUR_WIFI_PASSWORD");
   //wifiMulti.addAP("LAN", "116117118");
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(115200);
   MySettings.Init();
   MySettings.RestoreSettings();
   ETH_begin();

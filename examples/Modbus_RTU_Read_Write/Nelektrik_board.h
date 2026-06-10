@@ -19,7 +19,7 @@ Arduino library for communicating with Modbus slaves over RS232/485 (via RTU pro
 
 #ifdef KIT_DEV_ESP32
 #define Nelektrik_Serial Serial2
-#endif KIT_DEV_ESP32
+#endif // KIT_DEV_ESP32
 
 #define __MODBUSMASTER_DEBUG__ (0)
 

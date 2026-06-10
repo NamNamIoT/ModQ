@@ -6,16 +6,16 @@
 ModbusMaster node;
 /************************* WiFi Access Point *********************************/
 
-#define WLAN_SSID       "ANH DONG HOTTEL"
-#define WLAN_PASS       "tm282930"
+#define WLAN_SSID       "YOUR_WIFI_SSID"
+#define WLAN_PASS       "YOUR_WIFI_PASSWORD"
 
 
 /************************* Adafruit.io Setup *********************************/
 
-#define AIO_SERVER      "m11.cloudmqtt.com"
-#define AIO_SERVERPORT  14251
-#define AIO_USERNAME    "zewoxsve"
-#define AIO_KEY         "muR09iGutpIs"
+#define AIO_SERVER      "YOUR_MQTT_SERVER"
+#define AIO_SERVERPORT  1883
+#define AIO_USERNAME    "YOUR_MQTT_USERNAME"
+#define AIO_KEY         "YOUR_MQTT_KEY"
 
 /************ Global State (you don't need to change this!) ******************/
 WiFiClient client;

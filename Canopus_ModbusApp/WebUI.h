@@ -1,0 +1,1888 @@
+#ifndef WEB_UI_H
+#define WEB_UI_H
+
+#include <Arduino.h>
+
+const char INDEX_HTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Canopus - Modbus RTU IoT Gateway</title>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --primary-light: #e0f2fe;
+            --bg-app: #f0f9ff;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 280px;
+            background-color: #ffffff;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 10;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .lang-container {
+            margin-bottom: 24px;
+        }
+
+        .lang-select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-select:focus {
+            border-color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+            margin-top: auto;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.connected { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
+        .status-dot.disconnected { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        .status-dot.warning { background-color: var(--warning); box-shadow: 0 0 8px var(--warning); }
+
+        /* Main content area */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 1400px;
+            width: calc(100% - 280px);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        /* Card components */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard specific grids */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .device-card {
+            border-left: 4px solid var(--border-color);
+        }
+
+        .device-card.online {
+            border-left-color: var(--success);
+        }
+
+        .device-card.offline {
+            border-left-color: var(--danger);
+        }
+
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .device-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .device-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .value-item {
+            background-color: var(--bg-app);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .value-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .value-wrapper {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .value-val {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            transition: color 0.5s ease;
+        }
+
+        .value-val.flash-green {
+            color: var(--success);
+        }
+
+        .value-unit {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 4px;
+            font-weight: 500;
+        }
+
+        /* Button configurations */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        /* Config list UI */
+        .config-card-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--bg-app);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .config-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .config-item-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .config-item-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .config-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Register configuration table builder */
+        .reg-table-container {
+            margin-top: 16px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .reg-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+            background: white;
+        }
+
+        .reg-table th {
+            background-color: var(--bg-app);
+            padding: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .reg-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .reg-table input, .reg-table select {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            width: 100%;
+            outline: none;
+        }
+
+        .reg-table input:focus, .reg-table select:focus {
+            border-color: var(--primary);
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
+
+        /* Modal popup */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlide 0.3s ease-out;
+            padding: 24px;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+            margin-top: 24px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media(max-width: 991px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 16px;
+            }
+            .logo-container {
+                margin-bottom: 16px;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .nav-menu {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 8px;
+            }
+            .nav-item {
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">C</div>
+            <div class="logo-text" data-i18n="app_title">CANOPUS GATEWAY</div>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="lang-container">
+            <select class="lang-select" id="lang-select" onchange="changeLanguage(this.value)">
+                <option value="en">🇺🇸 English</option>
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="pt">🇧🇷 Português</option>
+            </select>
+        </div>
+        
+        <ul class="nav-menu">
+            <li><a class="nav-item active" onclick="switchTab('dashboard')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path></svg>
+                <span data-i18n="nav_dashboard">Dashboard</span>
+            </a></li>
+            <li><a class="nav-item" onclick="switchTab('devices')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                <span data-i18n="nav_devices">Modbus Devices</span>
+            </a></li>
+            <li><a class="nav-item" onclick="switchTab('wifi')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071a10.5 10.5 0 0114.14 0M1.414 6.586a17 17 0 0121.172 0"></path></svg>
+                <span data-i18n="nav_wifi">WiFi Networks</span>
+            </a></li>
+            <li><a class="nav-item" onclick="switchTab('mqtt')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                <span data-i18n="nav_mqtt">MQTT Config</span>
+            </a></li>
+            <li><a class="nav-item" onclick="switchTab('system')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span data-i18n="nav_system">System Status</span>
+            </a></li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="status-badge">
+                <span class="status-dot disconnected" id="wifi-dot"></span>
+                <span id="wifi-lbl">WiFi: Disconnected</span>
+            </div>
+            <div class="status-badge">
+                <span class="status-dot disconnected" id="mqtt-dot"></span>
+                <span id="mqtt-lbl">MQTT: Disconnected</span>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:8px;" id="uptime-lbl">Uptime: 0s</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <header>
+            <h1 id="page-title" data-i18n="nav_dashboard">Dashboard</h1>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <span style="font-size: 13px; color: var(--text-muted);" id="last-poll">Last update: --</span>
+                <div class="status-dot connected" style="display:none;" id="poll-indicator"></div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard" class="tab-panel active">
+            <div class="dashboard-grid" id="dashboard-container">
+                <!-- Live Cards loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- DEVICES TAB -->
+        <div id="devices" class="tab-panel">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div>
+                        <h2 data-i18n="lbl_devices_list">Modbus Devices List</h2>
+                        <p style="color:var(--text-muted); font-size:13px;" data-i18n="lbl_devices_desc">Manage up to 8 devices and configure register details.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openDeviceModal(-1)">
+                        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                        <span data-i18n="btn_add_device">Add Device</span>
+                    </button>
+                </div>
+
+                <div class="config-card-list" id="devices-list">
+                    <!-- Configured devices loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- WIFI TAB -->
+        <div id="wifi" class="tab-panel">
+            <div class="card">
+                <h2 data-i18n="lbl_wifi_config">WiFi Networks (Multi-WiFi)</h2>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;" data-i18n="lbl_wifi_desc">System supports up to 3 WiFi configurations and automatically switches.</p>
+
+                <div class="config-card-list" id="wifi-list" style="margin-bottom:24px;">
+                    <!-- Wifi configurations list -->
+                </div>
+
+                <h3 data-i18n="lbl_add_new_wifi">Add New WiFi</h3>
+                <div class="form-row" style="margin-top:12px; align-items:end;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label data-i18n="lbl_ssid">SSID / WiFi Name</label>
+                        <input type="text" class="form-control" id="wifi-ssid-input" data-i18n-placeholder="lbl_ssid" placeholder="WiFi Name">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label data-i18n="lbl_password">Password</label>
+                        <input type="password" class="form-control" id="wifi-pass-input" data-i18n-placeholder="lbl_password" placeholder="Password">
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="addWiFi()" data-i18n="btn_add_network">Add Network</button>
+                        <button class="btn btn-secondary" onclick="scanWiFi()" id="btn-scan" data-i18n="btn_scan_wifi">Scan WiFi</button>
+                    </div>
+                </div>
+                
+                <div id="scan-results" style="margin-top:16px; display:none;">
+                    <h4 data-i18n="lbl_found_networks">Found WiFi networks:</h4>
+                    <div id="scan-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MQTT CONFIG TAB -->
+        <div id="mqtt" class="tab-panel">
+            <div class="card">
+                <h2 data-i18n="lbl_mqtt_broker">MQTT Broker Configuration</h2>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;" data-i18n="lbl_mqtt_desc">Provide connection details to transmit real-time telemetry.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="lbl_mqtt_server">MQTT Server Address</label>
+                        <input type="text" class="form-control" id="mqtt-server" placeholder="broker.hivemq.com">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lbl_mqtt_port">Port</label>
+                        <input type="number" class="form-control" id="mqtt-port" placeholder="1883">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="lbl_mqtt_user">Username (Optional)</label>
+                        <input type="text" class="form-control" id="mqtt-user" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lbl_mqtt_pass">Password (Optional)</label>
+                        <input type="password" class="form-control" id="mqtt-pass" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lbl_mqtt_client_id">Client ID</label>
+                    <input type="text" class="form-control" id="mqtt-client-id" placeholder="canopus_client">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="lbl_mqtt_dtopic">Data Publish Topic</label>
+                        <input type="text" class="form-control" id="mqtt-dtopic" placeholder="canopus/device/data">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lbl_mqtt_ctopic">Command/Write Topic</label>
+                        <input type="text" class="form-control" id="mqtt-ctopic" placeholder="canopus/device/cmd">
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveMqtt()" data-i18n="btn_save_mqtt">Save MQTT Configuration</button>
+            </div>
+        </div>
+
+        <!-- SYSTEM TAB -->
+        <div id="system" class="tab-panel">
+            <div class="card">
+                <h2 data-i18n="lbl_sys_status">System Status</h2>
+                <table class="reg-table" style="margin-top:16px; margin-bottom:24px;">
+                    <tr>
+                        <th style="width:30%;" data-i18n="th_reg_name">Param Name</th>
+                        <th data-i18n="btn_save">Value</th>
+                    </tr>
+                    <tr>
+                        <td data-i18n="lbl_sys_ip">Current IP Address</td>
+                        <td id="sys-ip">--</td>
+                    </tr>
+                    <tr>
+                        <td data-i18n="lbl_sys_wifi">Connected SSID</td>
+                        <td id="sys-ssid">--</td>
+                    </tr>
+                    <tr>
+                        <td data-i18n="lbl_sys_ram">Free RAM (Heap)</td>
+                        <td id="sys-heap">-- bytes</td>
+                    </tr>
+                    <tr>
+                        <td data-i18n="lbl_sys_uptime">Gateway Uptime</td>
+                        <td id="sys-uptime">0s</td>
+                    </tr>
+                </table>
+
+                <h2 data-i18n="lbl_sys_actions">System Operations</h2>
+                <div style="display:flex; gap:12px; margin-top:16px;">
+                    <button class="btn btn-danger" onclick="restartEsp()" data-i18n="btn_restart">Restart Gateway</button>
+                    <button class="btn btn-secondary" onclick="factoryReset()" data-i18n="btn_factory_reset">Factory Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEVICE EDIT MODAL -->
+    <div class="modal" id="device-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" data-i18n="lbl_modal_title">Configure Modbus Device</h2>
+                <button class="btn btn-secondary btn-sm" onclick="closeDeviceModal()" data-i18n="btn_cancel">Cancel</button>
+            </div>
+            
+            <input type="hidden" id="modal-device-index">
+            <div class="form-row">
+                <div class="form-group">
+                    <label data-i18n="lbl_dev_name">Device Name</label>
+                    <input type="text" class="form-control" id="modal-dev-name" placeholder="E.g. Power Meter">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lbl_slave_id">Slave ID (1 - 247)</label>
+                    <input type="number" class="form-control" id="modal-dev-sid" min="1" max="247">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label data-i18n="lbl_baudrate">Baudrate (bps)</label>
+                    <select class="form-control" id="modal-dev-baud">
+                        <option value="4800">4800 bps</option>
+                        <option value="9600" selected>9600 bps</option>
+                        <option value="19200">19200 bps</option>
+                        <option value="38400">38400 bps</option>
+                        <option value="115200">115200 bps</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lbl_interval">Read Interval (ms)</label>
+                    <input type="number" class="form-control" id="modal-dev-interval" min="500" value="2000" placeholder="E.g. 2000">
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                <h3 data-i18n="lbl_registers_list">Registers List</h3>
+                <button class="btn btn-secondary btn-sm" onclick="addRegisterRow()" data-i18n="btn_add_register">+ Add Register</button>
+            </div>
+
+            <div class="reg-table-container">
+                <table class="reg-table">
+                    <thead>
+                        <tr>
+                            <th style="width:25%;" data-i18n="th_reg_name">Param Name</th>
+                            <th style="width:12%;" data-i18n="th_reg_addr">Address</th>
+                            <th style="width:18%;" data-i18n="th_reg_fn">Function Code</th>
+                            <th style="width:18%;" data-i18n="th_reg_type">Data Type</th>
+                            <th style="width:12%;" data-i18n="th_reg_mult">Multiplier</th>
+                            <th style="width:10%;" data-i18n="th_reg_unit">Unit</th>
+                            <th style="width:5%;" data-i18n="th_reg_del">Del</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-regs-body">
+                        <!-- Dynamic rows here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeviceModal()" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveDeviceConfig()" data-i18n="btn_save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Element -->
+    <div class="toast" id="toast-notify">
+        <span id="toast-text">Notification</span>
+    </div>
+
+    <script>
+        // --- TRANSLATION DICTIONARY ---
+        const translations = {
+            en: {
+                app_title: "CANOPUS GATEWAY",
+                nav_dashboard: "Dashboard",
+                nav_devices: "Modbus Devices",
+                nav_wifi: "WiFi Networks",
+                nav_mqtt: "MQTT Config",
+                nav_system: "System Status",
+                lbl_wifi_status: "WiFi: ",
+                lbl_mqtt_status: "MQTT: ",
+                lbl_uptime: "Uptime: ",
+                lbl_disconnected: "Disconnected",
+                lbl_connected: "Connected",
+                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_last_update: "Last update: ",
+                lbl_no_devices: "No active Modbus devices configured or offline.",
+                btn_configure_now: "Configure Now",
+                btn_add_device: "Add Device",
+                lbl_devices_list: "Modbus Devices List",
+                lbl_devices_desc: "Manage up to 8 devices and configure register details.",
+                lbl_configure_slot: "Configure Slot #",
+                lbl_edit: "Edit",
+                lbl_delete: "Delete",
+                lbl_wifi_config: "WiFi Networks (Multi-WiFi)",
+                lbl_wifi_desc: "System supports up to 3 WiFi configurations and automatically switches.",
+                lbl_add_new_wifi: "Add New WiFi",
+                lbl_ssid: "SSID / WiFi Name",
+                lbl_password: "Password",
+                btn_add_network: "Add Network",
+                btn_scan_wifi: "Scan WiFi",
+                lbl_found_networks: "Found WiFi networks:",
+                lbl_scanning: "Scanning available networks...",
+                lbl_no_networks: "No networks found!",
+                lbl_scan_error: "Error during WiFi scan!",
+                lbl_mqtt_broker: "MQTT Broker Configuration",
+                lbl_mqtt_desc: "Provide connection details to transmit real-time telemetry.",
+                lbl_mqtt_server: "MQTT Server Address",
+                lbl_mqtt_port: "Port",
+                lbl_mqtt_user: "Username (Optional)",
+                lbl_mqtt_pass: "Password (Optional)",
+                lbl_mqtt_client_id: "Client ID",
+                lbl_mqtt_dtopic: "Data Publish Topic",
+                lbl_mqtt_ctopic: "Command/Write Topic",
+                btn_save_mqtt: "Save MQTT Configuration",
+                lbl_sys_status: "System Status",
+                lbl_sys_ip: "Current IP Address",
+                lbl_sys_wifi: "Connected SSID",
+                lbl_sys_ram: "Free RAM (Heap)",
+                lbl_sys_uptime: "Gateway Uptime",
+                lbl_sys_actions: "System Operations",
+                btn_restart: "Restart Gateway",
+                btn_factory_reset: "Factory Reset",
+                lbl_modal_title: "Configure Modbus Device",
+                lbl_dev_name: "Device Name",
+                lbl_slave_id: "Slave ID (1 - 247)",
+                lbl_baudrate: "Baudrate (bps)",
+                lbl_interval: "Read Interval (ms)",
+                lbl_registers_list: "Registers List",
+                btn_add_register: "+ Add Register",
+                th_reg_name: "Param Name",
+                th_reg_addr: "Address",
+                th_reg_fn: "Function Code",
+                th_reg_type: "Data Type",
+                th_reg_mult: "Multiplier",
+                th_reg_unit: "Unit",
+                th_reg_del: "Del",
+                btn_cancel: "Cancel",
+                btn_save: "Save Changes",
+                toast_load_err: "Failed to load config!",
+                toast_save_ok: "Configuration saved and applied successfully!",
+                toast_save_err: "Failed to save configuration!",
+                toast_conn_err: "Network connection error!",
+                toast_device_limit: "Maximum of 8 devices reached!",
+                toast_reg_limit: "Maximum of 16 registers per device reached!",
+                toast_wifi_limit: "System supports up to 3 WiFis!",
+                err_dev_name: "Device name cannot be empty!",
+                err_slave_id: "Slave ID must be between 1 and 247!",
+                err_interval: "Minimum read interval is 500ms!",
+                err_addr_invalid: "Register address is invalid at row ",
+                err_mult_invalid: "Multiplier must be a number at row ",
+                prompt_delete_dev: "Are you sure you want to delete device slot #",
+                prompt_delete_wifi: "Delete this WiFi configuration?",
+                prompt_restart: "Are you sure you want to restart ESP32 Canopus Gateway?",
+                prompt_factory_reset: "Factory reset will wipe all configurations. Are you sure?",
+                toast_restarting: "Restarting Gateway... Please reload this page in 5-10 seconds.",
+                toast_resetting: "Performing factory reset and restarting...",
+                err_modbus_no_resp: "No response (Timeout)",
+                err_modbus_fn: "Illegal function code (0x01)",
+                err_modbus_addr: "Illegal address (0x02)",
+                err_modbus_val: "Illegal data value (0x03)",
+                err_modbus_timeout: "Response timed out (Timeout)",
+                err_modbus_crc: "CRC validation failed (CRC Error)"
+            },
+            vi: {
+                app_title: "CANOPUS GATEWAY",
+                nav_dashboard: "Dashboard",
+                nav_devices: "Thiết Bị Modbus",
+                nav_wifi: "Mạng WiFi",
+                nav_mqtt: "Cấu Hình MQTT",
+                nav_system: "Hệ Thống",
+                lbl_wifi_status: "WiFi: ",
+                lbl_mqtt_status: "MQTT: ",
+                lbl_uptime: "Uptime: ",
+                lbl_disconnected: "Mất kết nối",
+                lbl_connected: "Đã kết nối",
+                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_last_update: "Lần cập nhật cuối: ",
+                lbl_no_devices: "Chưa cấu hình thiết bị Modbus nào hoặc thiết bị không hoạt động.",
+                btn_configure_now: "Cấu hình ngay",
+                btn_add_device: "Thêm Thiết Bị",
+                lbl_devices_list: "Danh sách Thiết bị Modbus",
+                lbl_devices_desc: "Quản lý tối đa 8 thiết bị và cấu hình thanh ghi chi tiết.",
+                lbl_configure_slot: "Cấu hình Khe cắm #",
+                lbl_edit: "Sửa",
+                lbl_delete: "Xóa",
+                lbl_wifi_config: "Cấu hình mạng WiFi (Multi-WiFi)",
+                lbl_wifi_desc: "Hệ thống hỗ trợ lưu tối đa 3 cấu hình WiFi khác nhau và tự động chuyển đổi.",
+                lbl_add_new_wifi: "Thêm Mạng WiFi Mới",
+                lbl_ssid: "SSID / Tên WiFi",
+                lbl_password: "Mật Khẩu",
+                btn_add_network: "Thêm Mạng",
+                btn_scan_wifi: "Quét WiFi",
+                lbl_found_networks: "Mạng WiFi tìm thấy:",
+                lbl_scanning: "Đang quét các mạng WiFi khả dụng...",
+                lbl_no_networks: "Không tìm thấy mạng WiFi nào!",
+                lbl_scan_error: "Lỗi trong quá trình quét WiFi!",
+                lbl_mqtt_broker: "Cấu hình kết nối MQTT Broker",
+                lbl_mqtt_desc: "Điền thông tin kết nối máy chủ MQTT để truyền dữ liệu thời gian thực.",
+                lbl_mqtt_server: "Địa chỉ MQTT Broker",
+                lbl_mqtt_port: "Cổng Port",
+                lbl_mqtt_user: "Tài khoản (Tùy chọn)",
+                lbl_mqtt_pass: "Mật khẩu (Tùy chọn)",
+                lbl_mqtt_client_id: "Client ID",
+                lbl_mqtt_dtopic: "Data Publish Topic",
+                lbl_mqtt_ctopic: "Command/Write Topic",
+                btn_save_mqtt: "Lưu Cấu Hình MQTT",
+                lbl_sys_status: "Trạng thái hệ thống",
+                lbl_sys_ip: "Địa chỉ IP hiện tại",
+                lbl_sys_wifi: "Tên WiFi đang kết nối",
+                lbl_sys_ram: "Bộ nhớ RAM trống (Heap)",
+                lbl_sys_uptime: "Uptime Gateway",
+                lbl_sys_actions: "Thao tác hệ thống",
+                btn_restart: "Khởi Động Lại Gateway",
+                btn_factory_reset: "Khôi Phục Cài Đặt Gốc",
+                lbl_modal_title: "Cấu hình thiết bị Modbus",
+                lbl_dev_name: "Tên Thiết Bị",
+                lbl_slave_id: "Slave ID (1 - 247)",
+                lbl_baudrate: "Tốc độ Baud (Baudrate)",
+                lbl_interval: "Tần suất đọc (ms)",
+                lbl_registers_list: "Danh Sách Thanh Ghi (Registers)",
+                btn_add_register: "+ Thêm Thanh Ghi",
+                th_reg_name: "Tên Thông Số",
+                th_reg_addr: "Địa Chỉ",
+                th_reg_fn: "Function Code",
+                th_reg_type: "Kiểu Dữ Liệu",
+                th_reg_mult: "Hệ Số",
+                th_reg_unit: "Đơn Vị",
+                th_reg_del: "Xóa",
+                btn_cancel: "Hủy Bỏ",
+                btn_save: "Lưu Thay Đổi",
+                toast_load_err: "Không thể tải cấu hình!",
+                toast_save_ok: "Đã lưu và áp dụng cấu hình thành công!",
+                toast_save_err: "Lưu cấu hình thất bại!",
+                toast_conn_err: "Lỗi kết nối mạng!",
+                toast_device_limit: "Đã dùng hết 8 khe cắm thiết bị!",
+                toast_reg_limit: "Tối đa 16 thanh ghi mỗi thiết bị!",
+                toast_wifi_limit: "Hệ thống chỉ hỗ trợ tối đa 3 WiFi!",
+                err_dev_name: "Vui lòng nhập tên thiết bị!",
+                err_slave_id: "Slave ID phải từ 1 đến 247!",
+                err_interval: "Chu kỳ đọc tối thiểu là 500ms!",
+                err_addr_invalid: "Địa chỉ thanh ghi không hợp lệ tại dòng ",
+                err_mult_invalid: "Hệ số phải là số tại dòng ",
+                prompt_delete_dev: "Bạn có chắc chắn muốn xóa thiết bị khe #",
+                prompt_delete_wifi: "Xóa cấu hình WiFi này?",
+                prompt_restart: "Bạn có chắc chắn muốn khởi động lại ESP32 Canopus Gateway?",
+                prompt_factory_reset: "Khôi phục cài đặt gốc sẽ xóa sạch toàn bộ cấu hình. Bạn có chắc chắn?",
+                toast_restarting: "Đang khởi động lại Gateway... Hãy tải lại trang sau 5-10 giây.",
+                toast_resetting: "Đang khôi phục cài đặt gốc và khởi động lại...",
+                err_modbus_no_resp: "Không có phản hồi (Timeout)",
+                err_modbus_fn: "Mã Function lỗi (0x01)",
+                err_modbus_addr: "Địa chỉ ghi lỗi (0x02)",
+                err_modbus_val: "Giá trị dữ liệu lỗi (0x03)",
+                err_modbus_timeout: "Hết thời gian phản hồi (Timeout)",
+                err_modbus_crc: "Lỗi CRC (Sai kiểm tra tổng)"
+            },
+            es: {
+                app_title: "PASARELA CANOPUS",
+                nav_dashboard: "Dashboard",
+                nav_devices: "Dispositivos Modbus",
+                nav_wifi: "Redes WiFi",
+                nav_mqtt: "Config MQTT",
+                nav_system: "Estado del Sistema",
+                lbl_wifi_status: "WiFi: ",
+                lbl_mqtt_status: "MQTT: ",
+                lbl_uptime: "Uptime: ",
+                lbl_disconnected: "Desconectado",
+                lbl_connected: "Conectado",
+                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_last_update: "Última actualización: ",
+                lbl_no_devices: "No hay dispositivos Modbus configurados o fuera de línea.",
+                btn_configure_now: "Configurar ahora",
+                btn_add_device: "Añadir Dispositivo",
+                lbl_devices_list: "Lista de Dispositivos Modbus",
+                lbl_devices_desc: "Gestione hasta 8 dispositivos y configure detalles de registros.",
+                lbl_configure_slot: "Configurar ranura #",
+                lbl_edit: "Editar",
+                lbl_delete: "Eliminar",
+                lbl_wifi_config: "Configuración WiFi (Multi-WiFi)",
+                lbl_wifi_desc: "El sistema admite hasta 3 configuraciones de WiFi y cambia automáticamente.",
+                lbl_add_new_wifi: "Añadir Nueva Red WiFi",
+                lbl_ssid: "SSID / Nombre WiFi",
+                lbl_password: "Contraseña",
+                btn_add_network: "Añadir Red",
+                btn_scan_wifi: "Escanear WiFi",
+                lbl_found_networks: "Redes WiFi encontradas:",
+                lbl_scanning: "Escaneando redes disponibles...",
+                lbl_no_networks: "¡No se encontraron redes!",
+                lbl_scan_error: "¡Error durante el escaneo de WiFi!",
+                lbl_mqtt_broker: "Configuración del Broker MQTT",
+                lbl_mqtt_desc: "Proporcione detalles de conexión para transmitir telemetría en tiempo real.",
+                lbl_mqtt_server: "Dirección del Servidor MQTT",
+                lbl_mqtt_port: "Puerto",
+                lbl_mqtt_user: "Usuario (Opcional)",
+                lbl_mqtt_pass: "Contraseña (Opcional)",
+                lbl_mqtt_client_id: "ID de Cliente",
+                lbl_mqtt_dtopic: "Tema de Publicación de Datos",
+                lbl_mqtt_ctopic: "Tema de Comando/Escritura",
+                btn_save_mqtt: "Guardar Configuración MQTT",
+                lbl_sys_status: "Estado del Sistema",
+                lbl_sys_ip: "Dirección IP Actual",
+                lbl_sys_wifi: "SSID Conectado",
+                lbl_sys_ram: "RAM Libre (Heap)",
+                lbl_sys_uptime: "Tiempo de Actividad",
+                lbl_sys_actions: "Operaciones del Sistema",
+                btn_restart: "Reiniciar Pasarela",
+                btn_factory_reset: "Restablecimiento de Fábrica",
+                lbl_modal_title: "Configurar Dispositivo Modbus",
+                lbl_dev_name: "Nombre del Dispositivo",
+                lbl_slave_id: "ID de Esclavo (1 - 247)",
+                lbl_baudrate: "Baudrate (bps)",
+                lbl_interval: "Intervalo de Lectura (ms)",
+                lbl_registers_list: "Lista de Registros",
+                btn_add_register: "+ Añadir Registro",
+                th_reg_name: "Nombre Parám",
+                th_reg_addr: "Dirección",
+                th_reg_fn: "Código Función",
+                th_reg_type: "Tipo de Datos",
+                th_reg_mult: "Multiplicador",
+                th_reg_unit: "Unidad",
+                th_reg_del: "Elim",
+                btn_cancel: "Cancelar",
+                btn_save: "Guardar Cambios",
+                toast_load_err: "¡Error al cargar la configuración!",
+                toast_save_ok: "¡Configuración guardada y aplicada con éxito!",
+                toast_save_err: "¡Error al guardar la configuración!",
+                toast_conn_err: "¡Error de conexión de red!",
+                toast_device_limit: "¡Límite de 8 dispositivos alcanzado!",
+                toast_reg_limit: "¡Máximo de 16 registros por dispositivo alcanzado!",
+                toast_wifi_limit: "¡El sistema admite hasta 3 WiFi!",
+                err_dev_name: "¡El nombre del dispositivo no puede estar vacío!",
+                err_slave_id: "¡El ID de esclavo debe estar entre 1 y 247!",
+                err_interval: "¡El intervalo mínimo de lectura es de 500 ms!",
+                err_addr_invalid: "¡Dirección de registro no válida en la fila ",
+                err_mult_invalid: "¡El multiplicador debe ser un número en la fila ",
+                prompt_delete_dev: "¿Está seguro de que desea eliminar la ranura de dispositivo #",
+                prompt_delete_wifi: "¿Eliminar esta configuración de WiFi?",
+                prompt_restart: "¿Está seguro de que desea reiniciar la Pasarela ESP32 Canopus?",
+                prompt_factory_reset: "El restablecimiento de fábrica borrará toda la configuración. ¿Está seguro?",
+                toast_restarting: "Reiniciando Pasarela... Recargue esta página en 5-10 segundos.",
+                toast_resetting: "Realizando restablecimiento de fábrica y reiniciando...",
+                err_modbus_no_resp: "Sin respuesta (Timeout)",
+                err_modbus_fn: "Código de función no válido (0x01)",
+                err_modbus_addr: "Dirección no válida (0x02)",
+                err_modbus_val: "Valor de datos no válido (0x03)",
+                err_modbus_timeout: "Tiempo de respuesta agotado (Timeout)",
+                err_modbus_crc: "Error de validación CRC (Error de CRC)"
+            },
+            pt: {
+                app_title: "GATEWAY CANOPUS",
+                nav_dashboard: "Painel",
+                nav_devices: "Dispositivos Modbus",
+                nav_wifi: "Redes WiFi",
+                nav_mqtt: "Config MQTT",
+                nav_system: "Status do Sistema",
+                lbl_wifi_status: "WiFi: ",
+                lbl_mqtt_status: "MQTT: ",
+                lbl_uptime: "Uptime: ",
+                lbl_disconnected: "Desconectado",
+                lbl_connected: "Conectado",
+                lbl_ap_mode: "WiFi AP: Canopus_AP",
+                lbl_last_update: "Última atualização: ",
+                lbl_no_devices: "Nenhum dispositivo Modbus configurado ou offline.",
+                btn_configure_now: "Configurar Agora",
+                btn_add_device: "Adicionar Dispositivo",
+                lbl_devices_list: "Lista de Dispositivos Modbus",
+                lbl_devices_desc: "Gerencie até 8 dispositivos e configure detalhes de registros.",
+                lbl_configure_slot: "Configurar slot #",
+                lbl_edit: "Editar",
+                lbl_delete: "Excluir",
+                lbl_wifi_config: "Configuração WiFi (Multi-WiFi)",
+                lbl_wifi_desc: "O sistema suporta até 3 configurações de WiFi e muda automaticamente.",
+                lbl_add_new_wifi: "Adicionar Nova Rede WiFi",
+                lbl_ssid: "SSID / Nome WiFi",
+                lbl_password: "Senha",
+                btn_add_network: "Adicionar Rede",
+                btn_scan_wifi: "Escanear WiFi",
+                lbl_found_networks: "Redes WiFi encontradas:",
+                lbl_scanning: "Escaneando redes disponíveis...",
+                lbl_no_networks: "Nenhuma rede encontrada!",
+                lbl_scan_error: "Erro durante a varredura WiFi!",
+                lbl_mqtt_broker: "Configuração do Broker MQTT",
+                lbl_mqtt_desc: "Forneça detalhes de conexão para transmitir telemetria em tempo real.",
+                lbl_mqtt_server: "Endereço do Servidor MQTT",
+                lbl_mqtt_port: "Porta",
+                lbl_mqtt_user: "Usuário (Opcional)",
+                lbl_mqtt_pass: "Senha (Opcional)",
+                lbl_mqtt_client_id: "ID do Cliente",
+                lbl_mqtt_dtopic: "Tópico de Publicação de Dados",
+                lbl_mqtt_ctopic: "Tópico de Comando/Escrita",
+                btn_save_mqtt: "Salvar Configuração MQTT",
+                lbl_sys_status: "Status do Sistema",
+                lbl_sys_ip: "Endereço IP Atual",
+                lbl_sys_wifi: "SSID Conectado",
+                lbl_sys_ram: "RAM Livre (Heap)",
+                lbl_sys_uptime: "Tempo de Atividade",
+                lbl_sys_actions: "Operações do Sistema",
+                btn_restart: "Reiniciar Gateway",
+                btn_factory_reset: "Restauração de Fábrica",
+                lbl_modal_title: "Configurar Dispositivo Modbus",
+                lbl_dev_name: "Nome do Dispositivo",
+                lbl_slave_id: "ID do Escravo (1 - 247)",
+                lbl_baudrate: "Baudrate (bps)",
+                lbl_interval: "Intervalo de Leitura (ms)",
+                lbl_registers_list: "Lista de Registros",
+                btn_add_register: "+ Adicionar Registro",
+                th_reg_name: "Nome Parâm",
+                th_reg_addr: "Endereço",
+                th_reg_fn: "Código Função",
+                th_reg_type: "Tipo de Dados",
+                th_reg_mult: "Multiplicador",
+                th_reg_unit: "Unidade",
+                th_reg_del: "Excl",
+                btn_cancel: "Cancelar",
+                btn_save: "Salvar Alterações",
+                toast_load_err: "Falha ao carregar a configuração!",
+                toast_save_ok: "Configuração salva e aplicada com sucesso!",
+                toast_save_err: "Falha ao salvar a configuração!",
+                toast_conn_err: "Erro de conexão de rede!",
+                toast_device_limit: "Limite de 8 dispositivos atingido!",
+                toast_reg_limit: "Máximo de 16 registers por dispositivo atingido!",
+                toast_wifi_limit: "O sistema suporta até 3 WiFi!",
+                err_dev_name: "O nome do dispositivo não pode estar vazio!",
+                err_slave_id: "O ID do escravo deve estar entre 1 e 247!",
+                err_interval: "O intervalo mínimo de leitura é de 500 ms!",
+                err_addr_invalid: "Endereço de registro inválido na linha ",
+                err_mult_invalid: "O multiplicador deve ser um número na linha ",
+                prompt_delete_dev: "Tem certeza que deseja excluir o slot do dispositivo #",
+                prompt_delete_wifi: "Excluir esta configuração de WiFi?",
+                prompt_restart: "Tem certeza que deseja reiniciar o Gateway ESP32 Canopus?",
+                prompt_factory_reset: "A restauração de fábrica apagará todas as configurações. Tem certeza?",
+                toast_restarting: "Reiniciando Gateway... Recarregue esta página em 5-10 segundos.",
+                toast_resetting: "Realizando restauração de fábrica e reiniciando...",
+                err_modbus_no_resp: "Sem resposta (Timeout)",
+                err_modbus_fn: "Código de função inválido (0x01)",
+                err_modbus_addr: "Endereço inválido (0x02)",
+                err_modbus_val: "Valor de dados inválido (0x03)",
+                err_modbus_timeout: "Tempo de resposta esgotado (Timeout)",
+                err_modbus_crc: "Erro de validação CRC (Erro de CRC)"
+            }
+        };
+
+        let currentLang = localStorage.getItem('canopus_lang') || 'en';
+        let currentTab = 'dashboard';
+        let configData = { wifis: [], mqtt: {}, devices: [] };
+        let liveData = {};
+        let systemStatus = {};
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('canopus_lang', lang);
+            document.getElementById('lang-select').value = lang;
+            updateLanguage();
+            
+            renderDashboard();
+            renderDevicesList();
+            renderWiFiList();
+        }
+
+        function t(key) {
+            return (translations[currentLang] && translations[currentLang][key]) ? translations[currentLang][key] : key;
+        }
+
+        function updateLanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerHTML = t(key);
+            });
+            
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.setAttribute('placeholder', t(key));
+            });
+        }
+
+        // On document ready
+        window.addEventListener('DOMContentLoaded', () => {
+            changeLanguage(currentLang);
+            fetchConfig();
+            fetchStatus();
+            fetchData();
+            
+            setInterval(fetchData, 1500);
+            setInterval(fetchStatus, 3000);
+        });
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            const triggerIdx = tabId === 'dashboard' ? 'nav_dashboard' : 
+                               tabId === 'devices' ? 'nav_devices' : 
+                               tabId === 'wifi' ? 'nav_wifi' : 
+                               tabId === 'mqtt' ? 'nav_mqtt' : 'nav_system';
+
+            const trigger = Array.from(document.querySelectorAll('.nav-item')).find(el => {
+                const span = el.querySelector('[data-i18n]');
+                return span && span.getAttribute('data-i18n') === triggerIdx;
+            });
+            if(trigger) trigger.classList.add('active');
+            
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('page-title').setAttribute('data-i18n', triggerIdx);
+            document.getElementById('page-title').textContent = t(triggerIdx);
+        }
+
+        function showToast(text, type = 'success') {
+            const toast = document.getElementById('toast-notify');
+            toast.className = `toast toast-${type} show`;
+            document.getElementById('toast-text').textContent = text;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Fetch overall configurations
+        function fetchConfig() {
+            fetch('/api/config')
+                .then(res => res.json())
+                .then(data => {
+                    configData = data;
+                    renderDevicesList();
+                    renderWiFiList();
+                    populateMqttForm();
+                })
+                .catch(err => {
+                    console.error("Error fetching config:", err);
+                    showToast(t("toast_load_err"), "error");
+                });
+        }
+
+        // Fetch Live modbus values
+        function fetchData() {
+            const indicator = document.getElementById('poll-indicator');
+            indicator.style.display = 'block';
+            setTimeout(() => indicator.style.display = 'none', 300);
+
+            fetch('/api/data')
+                .then(res => res.json())
+                .then(data => {
+                    liveData = data;
+                    renderDashboard();
+                    document.getElementById('last-poll').textContent = t("lbl_last_update") + new Date().toLocaleTimeString();
+                })
+                .catch(err => console.error("Error fetching live data:", err));
+        }
+
+        // Fetch status variables (wifi, mqtt, sys)
+        function fetchStatus() {
+            fetch('/api/status')
+                .then(res => res.json())
+                .then(data => {
+                    systemStatus = data;
+                    updateStatusBar(data);
+                })
+                .catch(err => console.error("Error fetching system status:", err));
+        }
+
+        function updateStatusBar(status) {
+            // Wifi status
+            const wifiDot = document.getElementById('wifi-dot');
+            const wifiLbl = document.getElementById('wifi-lbl');
+            if (status.wifiConnected) {
+                wifiDot.className = 'status-dot connected';
+                wifiLbl.textContent = t("lbl_wifi_status") + status.wifiSsid;
+            } else if (status.apActive) {
+                wifiDot.className = 'status-dot warning';
+                wifiLbl.textContent = t("lbl_ap_mode");
+            } else {
+                wifiDot.className = 'status-dot disconnected';
+                wifiLbl.textContent = t("lbl_wifi_status") + t("lbl_disconnected");
+            }
+
+            // Mqtt status
+            const mqttDot = document.getElementById('mqtt-dot');
+            const mqttLbl = document.getElementById('mqtt-lbl');
+            if (status.mqttConnected) {
+                mqttDot.className = 'status-dot connected';
+                mqttLbl.textContent = t("lbl_mqtt_status") + t("lbl_connected");
+            } else {
+                mqttDot.className = 'status-dot disconnected';
+                mqttLbl.textContent = t("lbl_mqtt_status") + t("lbl_disconnected");
+            }
+
+            // Uptime
+            const upSecs = status.uptime || 0;
+            const hours = Math.floor(upSecs / 3600);
+            const mins = Math.floor((upSecs % 3600) / 60);
+            const secs = upSecs % 60;
+            const uptimeStr = `${hours}h ${mins}m ${secs}s`;
+            document.getElementById('uptime-lbl').textContent = t("lbl_uptime") + uptimeStr;
+
+            // System table update if active tab is system
+            if (currentTab === 'system') {
+                document.getElementById('sys-ip').textContent = status.ipAddress || '--';
+                document.getElementById('sys-ssid').textContent = status.wifiConnected ? status.wifiSsid : (status.apActive ? 'Access Point Mode' : t("lbl_disconnected"));
+                document.getElementById('sys-heap').textContent = (status.freeHeap || 0).toLocaleString();
+                document.getElementById('sys-uptime').textContent = uptimeStr;
+            }
+        }
+
+        // Dashboard renderer
+        function renderDashboard() {
+            const container = document.getElementById('dashboard-container');
+            const activeDevs = configData.devices ? configData.devices.filter(d => d.active) : [];
+            
+            if (activeDevs.length === 0) {
+                container.innerHTML = `
+                    <div class="card empty-state" style="grid-column:1/-1;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        <p data-i18n="lbl_no_devices">${t("lbl_no_devices")}</p>
+                        <button class="btn btn-primary" style="margin-top:16px;" onclick="switchTab('devices')" data-i18n="btn_configure_now">${t("btn_configure_now")}</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            activeDevs.forEach(dev => {
+                const devData = liveData[dev.index] || { online: false, regs: {} };
+                const stateClass = devData.online ? 'online' : 'offline';
+                const stateText = devData.online ? t("lbl_connected").toUpperCase() : t("lbl_disconnected").toUpperCase();
+                
+                html += `
+                    <div class="card device-card ${stateClass}">
+                        <div class="device-header">
+                            <div>
+                                <div class="device-title">${dev.name}</div>
+                                <div class="device-meta">Slave ID: ${dev.sid} | Baudrate: ${dev.baud} bps</div>
+                            </div>
+                            <span class="status-badge">
+                                <span class="status-dot ${devData.online ? 'connected' : 'disconnected'}"></span>
+                                <span style="font-weight:700; color:${devData.online ? 'var(--success)' : 'var(--danger)'}">${stateText}</span>
+                            </span>
+                        </div>
+                `;
+
+                if (!devData.online && devData.lastError) {
+                    let errDesc = t("err_modbus_no_resp");
+                    if (devData.lastError === 1) errDesc = t("err_modbus_fn");
+                    else if (devData.lastError === 2) errDesc = t("err_modbus_addr");
+                    else if (devData.lastError === 3) errDesc = t("err_modbus_val");
+                    else if (devData.lastError === 226) errDesc = t("err_modbus_timeout");
+                    else if (devData.lastError === 227) errDesc = t("err_modbus_crc");
+                    
+                    html += `
+                        <div style="background-color:#fee2e2; border:1px solid #fca5a5; padding:12px; border-radius:8px; margin-bottom:12px; font-size:12px; color:var(--danger)">
+                            <strong>Modbus RTU Error:</strong> ${errDesc} (Code: ${devData.lastError})
+                        </div>
+                    `;
+                }
+
+                html += `<div class="value-grid">`;
+                
+                if (dev.regs && dev.regs.length > 0) {
+                    dev.regs.forEach((reg, regIdx) => {
+                        const cellVal = devData.regs[regIdx];
+                        const displayVal = (cellVal !== undefined && cellVal !== null) ? cellVal.toFixed(2) : '--';
+                        const uniqueId = `val-${dev.index}-${regIdx}`;
+                        
+                        let flashClass = '';
+                        const oldEl = document.getElementById(uniqueId);
+                        if (oldEl && oldEl.textContent !== displayVal && displayVal !== '--') {
+                            flashClass = 'flash-green';
+                            setTimeout(() => {
+                                const newEl = document.getElementById(uniqueId);
+                                if(newEl) newEl.classList.remove('flash-green');
+                            }, 500);
+                        }
+
+                        html += `
+                            <div class="value-item">
+                                <span class="value-label">${reg.name || 'Addr ' + reg.addr}</span>
+                                <div class="value-wrapper">
+                                    <span class="value-val ${flashClass}" id="${uniqueId}">${displayVal}</span>
+                                    <span class="value-unit">${reg.unit || ''}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += `
+                        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-size: 13px; padding:12px;">
+                            No registers configured.
+                        </div>
+                    `;
+                }
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Devices config list renderer
+        function renderDevicesList() {
+            const list = document.getElementById('devices-list');
+            let html = '';
+
+            for (let i = 0; i < 8; i++) {
+                const dev = configData.devices ? configData.devices.find(d => d.index === i) : null;
+                if (dev && dev.active) {
+                    html += `
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <span class="config-item-title">${dev.name}</span>
+                                <span class="config-item-subtitle">
+                                    Slave ID: ${dev.sid} | Baud: ${dev.baud} | Interval: ${dev.int}ms | Regs: ${dev.regs ? dev.regs.length : 0}
+                                </span>
+                            </div>
+                            <div class="config-item-actions">
+                                <button class="btn btn-secondary btn-sm" onclick="openDeviceModal(${i})">${t("lbl_edit")}</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteDevice(${i})">${t("lbl_delete")}</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="config-item" style="border-style:dashed; background-color:transparent; justify-content:center; padding: 24px;">
+                            <button class="btn btn-secondary btn-sm" onclick="openDeviceModal(${i})">${t("lbl_configure_slot")} #${i+1}</button>
+                        </div>
+                    `;
+                }
+            }
+            list.innerHTML = html;
+        }
+
+        // Device configurations Modal Operations
+        function openDeviceModal(idx) {
+            const modal = document.getElementById('device-modal');
+            const tbody = document.getElementById('modal-regs-body');
+            tbody.innerHTML = '';
+            
+            document.getElementById('modal-device-index').value = idx;
+
+            if (idx >= 0 && configData.devices) {
+                const dev = configData.devices.find(d => d.index === idx);
+                if (dev) {
+                    document.getElementById('modal-title').textContent = `${t("lbl_modal_title")} #${idx + 1}`;
+                    document.getElementById('modal-dev-name').value = dev.name;
+                    document.getElementById('modal-dev-sid').value = dev.sid;
+                    document.getElementById('modal-dev-baud').value = dev.baud;
+                    document.getElementById('modal-dev-interval').value = dev.int;
+
+                    if (dev.regs) {
+                        dev.regs.forEach(reg => addRegisterRow(reg));
+                    }
+                }
+            } else {
+                let freeIdx = -1;
+                for (let i = 0; i < 8; i++) {
+                    const d = configData.devices ? configData.devices.find(x => x.index === i) : null;
+                    if (!d || !d.active) {
+                        freeIdx = i;
+                        break;
+                    }
+                }
+                
+                if (freeIdx === -1) {
+                    showToast(t("toast_device_limit"), "error");
+                    return;
+                }
+                
+                document.getElementById('modal-device-index').value = freeIdx;
+                document.getElementById('modal-title').textContent = `${t("lbl_modal_title")} #${freeIdx + 1}`;
+                document.getElementById('modal-dev-name').value = `Device ${freeIdx + 1}`;
+                document.getElementById('modal-dev-sid').value = freeIdx + 1;
+                document.getElementById('modal-dev-baud').value = 9600;
+                document.getElementById('modal-dev-interval').value = 2000;
+                
+                addRegisterRow();
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeDeviceModal() {
+            document.getElementById('device-modal').classList.remove('show');
+        }
+
+        function addRegisterRow(data = null) {
+            const tbody = document.getElementById('modal-regs-body');
+            const rowCount = tbody.children.length;
+            if (rowCount >= 16) {
+                showToast(t("toast_reg_limit"), "error");
+                return;
+            }
+
+            const tr = document.createElement('tr');
+            
+            const nameVal = data ? (data.name || '') : '';
+            const addrVal = data ? (data.addr !== undefined ? data.addr : 0) : 0;
+            const fnVal = data ? (data.fn || 3) : 3;
+            const typeVal = data ? (data.type !== undefined ? data.type : 0) : 0;
+            const multVal = data ? (data.mult !== undefined ? data.mult : 1) : 1;
+            const unitVal = data ? (data.unit || '') : '';
+
+            tr.innerHTML = `
+                <td><input type="text" class="reg-name" value="${nameVal}" placeholder="E.g. Temperature"></td>
+                <td><input type="number" class="reg-addr" value="${addrVal}" min="0" max="65535"></td>
+                <td>
+                    <select class="reg-fn">
+                        <option value="3" ${fnVal === 3 ? 'selected' : ''}>03 - Holding Reg</option>
+                        <option value="4" ${fnVal === 4 ? 'selected' : ''}>04 - Input Reg</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="reg-type">
+                        <option value="0" ${typeVal === 0 ? 'selected' : ''}>UINT16</option>
+                        <option value="1" ${typeVal === 1 ? 'selected' : ''}>INT16</option>
+                        <option value="2" ${typeVal === 2 ? 'selected' : ''}>UINT32 (2 reg)</option>
+                        <option value="3" ${typeVal === 3 ? 'selected' : ''}>INT32 (2 reg)</option>
+                        <option value="4" ${typeVal === 4 ? 'selected' : ''}>FLOAT (2 reg)</option>
+                    </select>
+                </td>
+                <td><input type="number" step="any" class="reg-mult" value="${multVal}"></td>
+                <td><input type="text" class="reg-unit" value="${unitVal}" placeholder="V"></td>
+                <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()" style="padding:4px 8px;">X</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function saveDeviceConfig() {
+            const idx = parseInt(document.getElementById('modal-device-index').value);
+            const name = document.getElementById('modal-dev-name').value.trim();
+            const sid = parseInt(document.getElementById('modal-dev-sid').value);
+            const baud = parseInt(document.getElementById('modal-dev-baud').value);
+            const interval = parseInt(document.getElementById('modal-dev-interval').value);
+
+            if (!name) { showToast(t("err_dev_name"), "error"); return; }
+            if (isNaN(sid) || sid < 1 || sid > 247) { showToast(t("err_slave_id"), "error"); return; }
+            if (isNaN(interval) || interval < 500) { showToast(t("err_interval"), "error"); return; }
+
+            const rows = document.querySelectorAll('#modal-regs-body tr');
+            const regs = [];
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const rName = row.querySelector('.reg-name').value.trim();
+                const rAddr = parseInt(row.querySelector('.reg-addr').value);
+                const rFn = parseInt(row.querySelector('.reg-fn').value);
+                const rType = parseInt(row.querySelector('.reg-type').value);
+                const rMult = parseFloat(row.querySelector('.reg-mult').value);
+                const rUnit = row.querySelector('.reg-unit').value.trim();
+
+                if (isNaN(rAddr) || rAddr < 0 || rAddr > 65535) {
+                    showToast(t("err_addr_invalid") + (i+1), "error");
+                    return;
+                }
+                if (isNaN(rMult)) {
+                    showToast(t("err_mult_invalid") + (i+1), "error");
+                    return;
+                }
+
+                regs.push({
+                    name: rName || `Reg ${rAddr}`,
+                    addr: rAddr,
+                    fn: rFn,
+                    type: rType,
+                    mult: rMult,
+                    unit: rUnit
+                });
+            }
+
+            if (!configData.devices) configData.devices = [];
+            
+            let dev = configData.devices.find(d => d.index === idx);
+            if (!dev) {
+                dev = { index: idx };
+                configData.devices.push(dev);
+            }
+
+            dev.active = true;
+            dev.name = name;
+            dev.sid = sid;
+            dev.baud = baud;
+            dev.int = interval;
+            dev.regs = regs;
+
+            postConfig();
+            closeDeviceModal();
+        }
+
+        function deleteDevice(idx) {
+            if (confirm(t("prompt_delete_dev") + (idx + 1) + "?")) {
+                const dev = configData.devices.find(d => d.index === idx);
+                if (dev) {
+                    dev.active = false;
+                    postConfig();
+                }
+            }
+        }
+
+        // WiFi config rendering
+        function renderWiFiList() {
+            const list = document.getElementById('wifi-list');
+            let html = '';
+            
+            const wifis = configData.wifis || [];
+            if (wifis.length === 0) {
+                list.innerHTML = `<div class="empty-state" style="padding:16px;">No configured WiFi networks. AP Mode only.</div>`;
+                return;
+            }
+
+            wifis.forEach((wf, index) => {
+                html += `
+                    <div class="config-item">
+                        <div class="config-item-info">
+                            <span class="config-item-title">${wf.ssid}</span>
+                            <span class="config-item-subtitle">Password: **********</span>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="removeWiFi(${index})">${t("lbl_delete")}</button>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function addWiFi() {
+            const ssid = document.getElementById('wifi-ssid-input').value.trim();
+            const pass = document.getElementById('wifi-pass-input').value.trim();
+
+            if (!ssid) {
+                showToast("SSID cannot be empty!", "error");
+                return;
+            }
+
+            if (!configData.wifis) configData.wifis = [];
+            if (configData.wifis.length >= 3) {
+                showToast(t("toast_wifi_limit"), "error");
+                return;
+            }
+
+            configData.wifis.push({ ssid: ssid, pass: pass });
+            document.getElementById('wifi-ssid-input').value = '';
+            document.getElementById('wifi-pass-input').value = '';
+            
+            postConfig();
+        }
+
+        function removeWiFi(idx) {
+            if (confirm(t("prompt_delete_wifi"))) {
+                configData.wifis.splice(idx, 1);
+                postConfig();
+            }
+        }
+
+        function scanWiFi() {
+            const btn = document.getElementById('btn-scan');
+            const scanDiv = document.getElementById('scan-results');
+            const scanList = document.getElementById('scan-list');
+            
+            btn.disabled = true;
+            btn.textContent = t("lbl_scanning");
+            scanDiv.style.display = 'block';
+            scanList.innerHTML = `<span style="font-size:13px;color:var(--text-muted)">${t("lbl_scanning")}</span>`;
+
+            fetch('/api/wifi-scan')
+                .then(res => res.json())
+                .then(networks => {
+                    btn.disabled = false;
+                    btn.textContent = t("btn_scan_wifi");
+                    
+                    if (networks.length === 0) {
+                        scanList.innerHTML = `<span style="font-size:13px;color:var(--danger)">${t("lbl_no_networks")}</span>`;
+                        return;
+                    }
+
+                    let listHtml = '';
+                    networks.forEach(net => {
+                        listHtml += `
+                            <button class="btn btn-secondary btn-sm" onclick="selectScannedWifi('${net.ssid}')" style="margin:2px;">
+                                ${net.ssid} (${net.rssi} dBm) ${net.secure ? '🔒' : '🔓'}
+                            </button>
+                        `;
+                    });
+                    scanList.innerHTML = listHtml;
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.textContent = t("btn_scan_wifi");
+                    scanList.innerHTML = `<span style="font-size:13px;color:var(--danger)">${t("lbl_scan_error")}</span>`;
+                });
+        }
+
+        function selectScannedWifi(ssid) {
+            document.getElementById('wifi-ssid-input').value = ssid;
+            document.getElementById('wifi-pass-input').focus();
+        }
+
+        // MQTT form population
+        function populateMqttForm() {
+            const mq = configData.mqtt || {};
+            document.getElementById('mqtt-server').value = mq.server || '';
+            document.getElementById('mqtt-port').value = mq.port || 1883;
+            document.getElementById('mqtt-user').value = mq.user || '';
+            document.getElementById('mqtt-pass').value = mq.pass || '';
+            document.getElementById('mqtt-client-id').value = mq.cid || 'canopus_client';
+            document.getElementById('mqtt-dtopic').value = mq.dtop || 'canopus/device/data';
+            document.getElementById('mqtt-ctopic').value = mq.ctop || 'canopus/device/cmd';
+        }
+
+        function saveMqtt() {
+            const server = document.getElementById('mqtt-server').value.trim();
+            const port = parseInt(document.getElementById('mqtt-port').value);
+            const user = document.getElementById('mqtt-user').value.trim();
+            const pass = document.getElementById('mqtt-pass').value.trim();
+            const cid = document.getElementById('mqtt-client-id').value.trim();
+            const dtop = document.getElementById('mqtt-dtopic').value.trim();
+            const ctop = document.getElementById('mqtt-ctopic').value.trim();
+
+            if (!server) { showToast("Broker server cannot be empty!", "error"); return; }
+            if (isNaN(port)) { showToast("Port is invalid!", "error"); return; }
+            if (!cid) { showToast("Client ID cannot be empty!", "error"); return; }
+            if (!dtop) { showToast("Data topic cannot be empty!", "error"); return; }
+
+            configData.mqtt = {
+                server: server,
+                port: port,
+                user: user,
+                pass: pass,
+                cid: cid,
+                dtop: dtop,
+                ctop: ctop
+            };
+
+            postConfig();
+        }
+
+        // Post all configs to API
+        function postConfig() {
+            fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(configData)
+            })
+            .then(res => {
+                if (res.ok) {
+                    showToast(t("toast_save_ok"));
+                    fetchConfig(); 
+                } else {
+                    showToast(t("toast_save_err"), "error");
+                }
+            })
+            .catch(err => {
+                console.error("Error saving config:", err);
+                showToast(t("toast_conn_err"), "error");
+            });
+        }
+
+        // System operations
+        function restartEsp() {
+            if (confirm(t("prompt_restart"))) {
+                fetch('/api/restart', { method: 'POST' })
+                    .then(() => {
+                        showToast(t("toast_restarting"));
+                    })
+                    .catch(() => showToast("Success!"));
+            }
+        }
+
+        function factoryReset() {
+            if (confirm(t("prompt_factory_reset"))) {
+                fetch('/api/reset', { method: 'POST' })
+                    .then(() => {
+                        showToast(t("toast_resetting"));
+                        setTimeout(() => window.location.reload(), 5000);
+                    })
+                    .catch(() => showToast(t("toast_conn_err"), "error"));
+            }
+        }
+    </script>
+</body>
+</html>
+)rawliteral";
+
+#endif // WEB_UI_H

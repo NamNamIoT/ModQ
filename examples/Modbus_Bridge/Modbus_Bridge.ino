@@ -33,7 +33,7 @@ void setup()
   ETH_begin();
   delay(5000);
   WiFi.begin("TEN_WIFI", "PASS_WIFI");
-  while (WiFi.status() != WL_CONNECTED||eth_connected) {
+  while (WiFi.status() != WL_CONNECTED && !eth_connected) {
     delay(500);
     Serial.print(".");
   }
@@ -64,12 +64,13 @@ void loop()
     uint16_t data[2];
     digitalWrite(32, !digitalRead(32));//blink led
     data[0]=node.getResponseBuffer(0);
+    data[1]=node.getResponseBuffer(1);  // Fix: lấy đúng data[1] từ buffer
     Serial.printf("\n\rValue 40001: ");
     Serial.print(data[0]);
     Serial.printf("\n\rValue 40002: ");
     Serial.print(data[1]);
-    mb.Hreg(0, data[0]);//Move data from "read modbus RTU" to "modbus TCP/IP"
-    mb.Hreg(1, data[1]);//Move data from "read modbus RTU" to "modbus TCP/IP"
+    mb.Hreg(1, data[0]);//Move data from "read modbus RTU" to "modbus TCP/IP"
+    mb.Hreg(2, data[1]);//Move data from "read modbus RTU" to "modbus TCP/IP"
   }
   else Serial.print("Fail read");
   delay(1000); 

@@ -1,0 +1,6 @@
+*.exe
+*.o
+*.a
+*.so
+*.dll
+Canopus_ModbusApp/tests/run_tests.exe

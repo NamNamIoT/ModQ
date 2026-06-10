@@ -24,7 +24,7 @@ void setup() {
   ETH_begin();
   delay(5000);
   WiFi.begin("TEN_WIFI", "PASS_WIFI");
-  while (WiFi.status() != WL_CONNECTED||eth_connected) {
+  while (WiFi.status() != WL_CONNECTED && !eth_connected) {
     delay(500);
     Serial.print(".");
   }

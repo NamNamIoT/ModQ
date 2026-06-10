@@ -20,13 +20,13 @@ MQTT_WIFI MQTT_WiFi;
 #define LED1 2
 #define LED2 15
 #define ETH 14
-int PORT=14004;
-String SERVER="m15.cloudmqtt.com";
-String USER="daqfklra";
-String PASS="QRMxrYy1vVYs";
+int PORT=1883;
+String SERVER="YOUR_MQTT_SERVER";
+String USER="YOUR_MQTT_USERNAME";
+String PASS="YOUR_MQTT_PASSWORD";
 
-String SSID_WIFI="LAN";
-String PASS_WIFI="116117118";
+String SSID_WIFI="YOUR_WIFI_SSID";
+String PASS_WIFI="YOUR_WIFI_PASSWORD";
 
 long Add_MB[12]; 
 
@@ -213,7 +213,8 @@ bool Read_modbus()
 void Restoredefault()
 {
   Serial.print("\r\nRestoredefault\r\n");
-  String str_default = "1CANOPUS\n123456789\nm15.cloudmqtt.com\n14004\ndaqfklra\nQRMxrYy1vVYs\n9600\n134217756\n000001\n10\n";
+  // NOTE: Replace with your actual credentials before use
+  String str_default = "1CANOPUS\n123456789\nYOUR_MQTT_SERVER\n1883\nYOUR_MQTT_USERNAME\nYOUR_MQTT_PASSWORD\n9600\n134217756\n000001\n10\n";
   MySettings.SaveAllSetting(&str_default);
   Serial.print("\r\nRESET\r\n");
   ESP.restart();
